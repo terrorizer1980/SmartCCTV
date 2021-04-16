@@ -880,9 +880,17 @@ extern "C" void draw_detections_cv_v3(mat_cv* mat, detection *dets, int num, flo
     try {
         cv::Mat *show_img = (cv::Mat*)mat;
         int i, j;
+        int accur ; //add code(object abbuacy)
+    	char img_name[100] ; //add code(file name)
+
         if (!show_img) return;
         static int frame_id = 0;
         frame_id++;
+
+        /*add code(cutting image) start*/
+    	cv::Mat _image = *show_img ; //original frame image
+    	cv::Mat subImage = _image.clone() ; //original frame image
+    	/*add code end*/
 
         for (i = 0; i < num; ++i) {
             char labelstr[4096] = { 0 };
@@ -901,12 +909,16 @@ extern "C" void draw_detections_cv_v3(mat_cv* mat, detection *dets, int num, flo
                         sprintf(buff, " (%2.0f%%)", dets[i].prob[j] * 100);
                         strcat(labelstr, buff);
                         printf("%s: %.0f%% ", names[j], dets[i].prob[j] * 100);
+                        accur = dets[i].prob[j] * 100 ; //add code(object accuracy)
+            			sprintf(img_name, "%s", names[j]) ; //add code(object name)
                         if (dets[i].track_id) printf("(track = %d, sim = %f) ", dets[i].track_id, dets[i].sim);
                     }
                     else {
                         strcat(labelstr, ", ");
                         strcat(labelstr, names[j]);
                         printf(", %s: %.0f%% ", names[j], dets[i].prob[j] * 100);
+                        accur = dets[i].prob[j] * 100 ; //add code(objec accuracy)
+            			sprintf(img_name, "%s", names[j]) ; //add code(object name)
                     }
                 }
             }
@@ -956,6 +968,21 @@ extern "C" void draw_detections_cv_v3(mat_cv* mat, detection *dets, int num, flo
                 //int b_width = right - left;
                 //int b_height = bot - top;
                 //sprintf(labelstr, "%d x %d - w: %d, h: %d", b_x_center, b_y_center, b_width, b_height);
+
+                /*add code(cutting image) start*/
+        		if(accur >= 90 && frame_id % 125 == 0 && strcmp(img_name,"cow")==0) {
+        		//object accuracy is over 90% and object name is 'cow'
+        			
+        			cv::Mat cutImage ; // saving image
+        			cutImage = subImage(cv::Range(top, bot), cv::Range(left, right)) ; // image cut
+        
+        			char filename[100] ;
+        			sprintf(filename, "/content/darknet/cut_video/%d-%s-%d.jpg", frame_id, img_name, i) ;
+        			//file name and save point
+        			
+        			imwrite(filename, cutImage) ; //cutting image save the file
+        		}
+        		/*add code end*/
 
                 float const font_size = show_img->rows / 1000.F;
                 cv::Size const text_size = cv::getTextSize(labelstr, cv::FONT_HERSHEY_COMPLEX_SMALL, font_size, 1, 0);

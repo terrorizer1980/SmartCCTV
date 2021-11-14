@@ -970,11 +970,11 @@ extern "C" void draw_detections_cv_v3(mat_cv* mat, detection *dets, int num, flo
                 //sprintf(labelstr, "%d x %d - w: %d, h: %d", b_x_center, b_y_center, b_width, b_height);
 
                 /*add code(cutting image) start*/
-        		if(accur >= 90 && frame_id % 125 == 0 && strcmp(img_name,"cow")==0) {
+        		if(accur >= 99 && strcmp(img_name,"person")==0) {
         		//object accuracy is over 90% and object name is 'cow'
         			
         			cv::Mat cutImage ; // saving image
-        			cutImage = subImage(cv::Range(top, bot), cv::Range(left, right)) ; // image cut
+        			cutImage = subImage(cv::Range(top-5, bot+5), cv::Range(left-5, right+5)) ; // image cut
         
         			char filename[100] ;
         			sprintf(filename, "/content/darknet/cut_video/%d-%s-%d.jpg", frame_id, img_name, i) ;
